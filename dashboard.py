@@ -24,9 +24,19 @@ st.set_page_config(
 
 st.title("🔍 Competitor Product Monitor")
 
-# Check API key status
-has_anthropic_key = bool(os.environ.get("ANTHROPIC_API_KEY"))
-has_screenshot_key = bool(os.environ.get("SCREENSHOTONE_API_KEY"))
+# Check API key status (env vars or Streamlit secrets)
+def get_secret(key):
+    """Get secret from env var or Streamlit secrets."""
+    val = os.environ.get(key)
+    if val:
+        return val
+    try:
+        return st.secrets.get(key, "")
+    except:
+        return ""
+
+has_anthropic_key = bool(get_secret("ANTHROPIC_API_KEY"))
+has_screenshot_key = bool(get_secret("SCREENSHOTONE_API_KEY"))
 
 # Sidebar
 st.sidebar.header("Actions")
