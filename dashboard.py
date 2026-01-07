@@ -117,6 +117,14 @@ if selected_brand:
                 )
             st.rerun()
 
+# Facebook quick links
+st.sidebar.divider()
+with st.sidebar.expander("📱 Facebook Pages"):
+    for brand, config in COMPETITORS.items():
+        social = config.get("social", [])
+        if social:
+            st.markdown(f"[{brand}]({social[0]})")
+
 # Stats
 stats = get_stats()
 
