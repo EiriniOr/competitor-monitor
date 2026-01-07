@@ -204,6 +204,16 @@ def get_scrape_history(limit: int = 50):
     return results
 
 
+def mark_all_as_baseline():
+    """Mark all current products as baseline (not new)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Set first_seen to 30 days ago so they don't appear as "new"
+    cursor.execute("UPDATE products SET first_seen = date('now', '-30 days')")
+    conn.commit()
+    conn.close()
+
+
 def get_stats():
     """Get dashboard statistics."""
     conn = get_connection()

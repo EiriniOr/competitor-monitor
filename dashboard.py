@@ -11,7 +11,7 @@ from pathlib import Path
 
 from database import (
     get_stats, get_new_products, get_all_products,
-    get_products_by_brand, get_scrape_history
+    get_products_by_brand, get_scrape_history, mark_all_as_baseline
 )
 from config import COMPETITORS
 
@@ -158,7 +158,14 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 ])
 
 with tab1:
-    st.header("New Products (Last 15 Days)")
+    col_h1, col_h2 = st.columns([3, 1])
+    with col_h1:
+        st.header("New Products (Last 15 Days)")
+    with col_h2:
+        if st.button("Mark all as seen", help="Clear baseline - only truly new products will show after next scan"):
+            mark_all_as_baseline()
+            st.success("Baseline set! Next scan will only show new products.")
+            st.rerun()
 
     days_filter = st.slider("Days to look back:", 1, 60, 15)
     new_products = get_new_products(days_filter)
