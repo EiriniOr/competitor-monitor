@@ -1,0 +1,47 @@
+name: Competitor Scan
+
+on:
+  schedule:
+    # Run on 1st and 15th of each month at 9am UTC
+    - cron: '0 9 1 * *'
+    - cron: '0 9 15 * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Run vision scan
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SCREENSHOTONE_API_KEY: ${{ secrets.SCREENSHOTONE_API_KEY }}
+        run: python run_vision.py
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: scan-results-${{ github.run_number }}
+          path: |
+            products.db
+            screenshots/
+
+      - name: Commit database updates
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add products.db || true
+          git diff --staged --quiet || git commit -m "Update products database [skip ci]"
+          git push || true

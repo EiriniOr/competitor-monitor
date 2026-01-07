@@ -1,0 +1,20 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Local files
+screenshots/
+*.log
+
+# Secrets (never commit!)
+.env
+secrets.toml
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
