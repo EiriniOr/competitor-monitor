@@ -48,16 +48,26 @@ if not has_anthropic_key:
 else:
     if st.sidebar.button("🔍 Run Vision Scan", type="primary", help="Uses Claude Vision API"):
         with st.spinner("Capturing screenshots and analyzing with AI..."):
+            # Pass secrets as env vars to subprocess
+            env = os.environ.copy()
+            env["ANTHROPIC_API_KEY"] = get_secret("ANTHROPIC_API_KEY")
+            if get_secret("SCREENSHOTONE_API_KEY"):
+                env["SCREENSHOTONE_API_KEY"] = get_secret("SCREENSHOTONE_API_KEY")
+
             result = subprocess.run(
                 ["python", "run_vision.py"],
                 capture_output=True,
                 text=True,
-                cwd=Path(__file__).parent
+                cwd=Path(__file__).parent,
+                env=env,
+                timeout=300  # 5 min timeout
             )
             if result.returncode == 0:
                 st.sidebar.success("Vision scan complete!")
+                if result.stdout:
+                    st.expander("Output").code(result.stdout[-2000:])
             else:
-                st.sidebar.error(f"Error: {result.stderr[:200]}")
+                st.sidebar.error(f"Error: {result.stderr[:500] if result.stderr else 'Unknown error'}")
         st.rerun()
 
 st.sidebar.divider()
@@ -87,9 +97,15 @@ if selected_brand:
     with col1:
         if st.button("📸 Vision"):
             with st.spinner(f"Analyzing {selected_brand}..."):
+                env = os.environ.copy()
+                env["ANTHROPIC_API_KEY"] = get_secret("ANTHROPIC_API_KEY")
+                if get_secret("SCREENSHOTONE_API_KEY"):
+                    env["SCREENSHOTONE_API_KEY"] = get_secret("SCREENSHOTONE_API_KEY")
                 subprocess.run(
                     ["python", "run_vision.py", selected_brand],
-                    cwd=Path(__file__).parent
+                    cwd=Path(__file__).parent,
+                    env=env,
+                    timeout=120
                 )
             st.rerun()
     with col2:
