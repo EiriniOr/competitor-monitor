@@ -31,7 +31,7 @@ def get_secret(key):
     if val:
         return val
     try:
-        return st.secrets.get(key, "")
+        return st.secrets[key]
     except:
         return ""
 

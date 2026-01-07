@@ -20,7 +20,7 @@ def get_api_key():
     # Try Streamlit secrets (for cloud deployment)
     try:
         import streamlit as st
-        return st.secrets.get("ANTHROPIC_API_KEY", "")
+        return st.secrets["ANTHROPIC_API_KEY"]
     except:
         return ""
 
