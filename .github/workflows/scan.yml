@@ -28,6 +28,7 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           SCREENSHOTONE_API_KEY: ${{ secrets.SCREENSHOTONE_API_KEY }}
+          COMPETITORS_CONFIG: ${{ secrets.COMPETITORS_CONFIG }}
         run: python run_vision.py
 
       - name: Upload results

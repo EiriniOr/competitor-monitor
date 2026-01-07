@@ -11,6 +11,7 @@ screenshots/
 # Secrets (never commit!)
 .env
 secrets.toml
+competitors_private.json
 
 # macOS
 .DS_Store
