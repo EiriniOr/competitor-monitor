@@ -125,6 +125,18 @@ with st.sidebar.expander("📱 Facebook Pages"):
         if social:
             st.markdown(f"[{brand}]({social[0]})")
 
+# Manual check links (brands that can't be auto-scanned)
+with st.sidebar.expander("🔗 Manual Check"):
+    st.caption("These brands need manual checking:")
+    for brand, config in COMPETITORS.items():
+        status = config.get("status", "")
+        if status in ["maintenance", "server_blocking", "no_website", "url_not_found"]:
+            website = config.get("website", "")
+            social = config.get("social", [])
+            link = website or (social[0] if social else "")
+            if link:
+                st.markdown(f"[{brand}]({link})")
+
 # Stats
 stats = get_stats()
 
