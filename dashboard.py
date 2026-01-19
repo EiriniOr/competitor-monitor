@@ -180,44 +180,65 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 with tab1:
     col_h1, col_h2 = st.columns([3, 1])
     with col_h1:
-        st.header("New Products (Last 15 Days)")
+        st.header("🆕 New Products (Last 15 Days)")
     with col_h2:
         if st.button("Mark all as seen", help="Clear baseline - only truly new products will show after next scan"):
             mark_all_as_baseline()
             st.success("Baseline set! Next scan will only show new products.")
             st.rerun()
 
-    days_filter = st.slider("Days to look back:", 1, 60, 15)
-    new_products = get_new_products(days_filter)
+    # New products (0-15 days)
+    new_products = get_new_products(15)
 
     if new_products:
         df = pd.DataFrame(new_products, columns=["Brand", "Product", "URL", "Image", "First Seen"])
         df["First Seen"] = pd.to_datetime(df["First Seen"])
 
-        # Group by brand for better display
         for brand in df["Brand"].unique():
             brand_df = df[df["Brand"] == brand]
-            st.subheader(f"{brand} ({len(brand_df)} products)")
+            st.subheader(f"{brand} ({len(brand_df)} new)")
 
             for _, row in brand_df.iterrows():
                 col1, col2 = st.columns([4, 1])
                 with col1:
                     if row["URL"]:
-                        st.markdown(f"• [{row['Product']}]({row['URL']})")
+                        st.markdown(f"🆕 [{row['Product']}]({row['URL']})")
                     else:
-                        st.write(f"• {row['Product']}")
+                        st.write(f"🆕 {row['Product']}")
                 with col2:
                     st.caption(row["First Seen"].strftime("%Y-%m-%d"))
 
-        st.divider()
         st.download_button(
-            "📥 Export CSV",
+            "📥 Export New Products CSV",
             df.to_csv(index=False),
             "new_products.csv",
             "text/csv"
         )
     else:
-        st.info("No new products found in the selected period. Run a scan to check for updates.")
+        st.info("No new products in the last 15 days.")
+
+    # Recent products (15-60 days)
+    st.divider()
+    st.subheader("📋 Recent Products (15-60 days ago)")
+
+    recent_products = get_new_products(60)
+    if recent_products:
+        df_recent = pd.DataFrame(recent_products, columns=["Brand", "Product", "URL", "Image", "First Seen"])
+        df_recent["First Seen"] = pd.to_datetime(df_recent["First Seen"])
+        # Filter to 15-60 days only
+        cutoff_15 = pd.Timestamp.now() - pd.Timedelta(days=15)
+        df_recent = df_recent[df_recent["First Seen"] < cutoff_15]
+
+        if not df_recent.empty:
+            for brand in df_recent["Brand"].unique():
+                brand_df = df_recent[df_recent["Brand"] == brand]
+                with st.expander(f"{brand} ({len(brand_df)} products)"):
+                    for _, row in brand_df.iterrows():
+                        st.write(f"• {row['Product']} ({row['First Seen'].strftime('%Y-%m-%d')})")
+        else:
+            st.caption("No products from 15-60 days ago.")
+    else:
+        st.caption("No recent products.")
 
 with tab2:
     st.header("All Tracked Products")
